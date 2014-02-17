@@ -60,7 +60,7 @@ class Captcha {
      * @access	public
      * @return	img
      */
-    public static function create($id = null)
+    public static function create($id = null, $base64 = false)
     {
 
         static::$char = Str::random(static::$config['length']);
@@ -102,10 +102,19 @@ class Captcha {
 
         header('Cache-Control: no-cache, no-store, max-age=0, must-revalidate');
         header('Pragma: no-cache');
-        header("Content-type: image/jpg");
+        header('Content-type: image/jpg');
         header('Content-Disposition: inline; filename=' . static::$id . '.jpg');
-        imagejpeg($new_image, null, static::$config['quality']);
-        imagedestroy($new_image);
+
+        if ($base64) {
+            ob_start();
+            imagejpeg($new_image, null, static::$config['quality']);
+            imagedestroy($new_image);
+            $i = ob_get_clean();
+            return base64_encode($i);
+        } else {
+            imagejpeg($new_image, null, static::$config['quality']);
+            imagedestroy($new_image);
+        }
 
     }
 
